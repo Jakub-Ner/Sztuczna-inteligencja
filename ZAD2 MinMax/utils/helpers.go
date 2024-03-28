@@ -32,11 +32,21 @@ func TakeInput(message string) (int8, int8) {
 	MoveCursor(BOARD_WIDTH+DISPLAY_MARGIN, DISPLAY_MARGIN+LineCounter)
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
+
 	input := scanner.Text()
 
 	coords := strings.Split(input, " ")
-	x, _ := strconv.ParseInt(coords[0], 10, 8)
-	y, _ := strconv.ParseInt(coords[1], 10, 8)
+	if len(coords) != 2 {
+		PrintMessage("Invalid input")
+		return TakeInput(message)
+	}
 
+	x, err1 := strconv.ParseInt(coords[0], 10, 8)
+	y, err2 := strconv.ParseInt(coords[1], 10, 8)
+
+	if err1 != nil || err2 != nil {
+		PrintMessage("Invalid input")
+		return TakeInput(message)
+	}
 	return int8(x), int8(y)
 }

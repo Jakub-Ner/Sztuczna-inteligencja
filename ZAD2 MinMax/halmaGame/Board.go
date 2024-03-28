@@ -49,7 +49,7 @@ func (b *Board) ResetPawns() {
 			}
 		}
 	}
-	b.initMoves()
+	b.updateMoves()
 }
 
 func (b *Board) Reset() {
@@ -76,22 +76,23 @@ func validateMove(x, y int8) bool {
 	return x >= 0 && x < utils.COLUMNS && y >= 0 && y < utils.COLUMNS
 }
 
-func canJump(from Coords, to Coords, b Board) bool {
+func canJump(from Coords, to *Coords, b Board) bool {
 	diffX := to.X - from.X
 	diffY := to.Y - from.Y
-	x, y := to.X+diffX, to.Y+diffY
-	return validateMove(x, y) && b.Fields[y][x].CanMoveHere()
+	to.X, to.Y = to.X+diffX, to.Y+diffY
+	return validateMove(to.X, to.Y) && b.Fields[to.Y][to.X].CanMoveHere()
 }
 
-func (b *Board) initMoves() {
+func (b *Board) updateMoves() {
 	for _, pawn := range b.Pawns {
+		pawn.ValidMoves = nil
 		potentialMoves := getNeighbour(pawn.Coords.X, pawn.Coords.Y, 0)
 		for _, move := range potentialMoves {
 			if b.Fields[move.Direction.Y][move.Direction.X].CanMoveHere() && move.NumberOfJumps == 0 {
 				move.NumberOfJumps = 0
 				pawn.ValidMoves = append(pawn.ValidMoves, move)
 			} else {
-				if canJump(pawn.Coords, move.Direction, *b) {
+				if canJump(pawn.Coords, &move.Direction, *b) {
 					move.NumberOfJumps = +1
 					pawn.ValidMoves = append(pawn.ValidMoves, move)
 					newNeighbours := getNeighbour(move.Direction.X, move.Direction.Y, move.NumberOfJumps)

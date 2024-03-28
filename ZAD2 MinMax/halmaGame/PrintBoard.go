@@ -25,6 +25,8 @@ func (b *Board) selectPawn(currentPlayer utils.Player) *Pawn {
 }
 
 func displayMoves(pawn Pawn) {
+	utils.MoveCursor(3*int(pawn.Coords.X)+4, int(pawn.Coords.Y)+2)
+	print("🟣 ")
 	for _, move := range pawn.ValidMoves {
 		utils.MoveCursor(3*int(move.Direction.X)+4, int(move.Direction.Y)+2)
 		print("🟪 ")

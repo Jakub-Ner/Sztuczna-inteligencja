@@ -7,8 +7,16 @@ type Game struct {
 	currentPlayer utils.Player
 }
 
+// TODO: implement the function
 func validateResult() bool {
 	return false
+}
+
+func getOpponent(player utils.Player) utils.Player {
+	if player == utils.PLAYER_YELLOW {
+		return utils.PLAYER_GREEN
+	}
+	return utils.PLAYER_YELLOW
 }
 
 func (g *Game) RunGame() {
@@ -17,7 +25,6 @@ func (g *Game) RunGame() {
 
 	for !validateResult() {
 		g.board.Print()
-		// color validation
 		selectedPawn := g.board.selectPawn(g.currentPlayer)
 		displayMoves(*selectedPawn)
 		selectedMove := g.board.selectMove(selectedPawn)
@@ -25,6 +32,8 @@ func (g *Game) RunGame() {
 			continue
 		}
 		g.board.MovePawn(selectedPawn, *selectedMove)
-		//	updating the moves
+		g.board.updateMoves()
+
+		g.currentPlayer = getOpponent(g.currentPlayer)
 	}
 }
