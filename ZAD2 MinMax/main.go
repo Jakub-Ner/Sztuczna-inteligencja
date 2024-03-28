@@ -1,10 +1,13 @@
 package main
 
-import "ZAD2_MinMax/halmaGame"
+import (
+	"ZAD2_MinMax/halmaGame"
+	"ZAD2_MinMax/utils"
+)
 
 func main() {
-	board := halmaGame.NewBoard()
-	board.Print()
+	game := halmaGame.Game{}
+	game.RunGame()
 
-	halmaGame.MoveCursor(0, halmaGame.BOARD_HEIGHT+1)
+	utils.MoveCursor(0, utils.BOARD_HEIGHT+1)
 }

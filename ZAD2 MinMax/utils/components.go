@@ -1,10 +1,10 @@
 package utils
 
-type Player = int8
+type Player = string
 
 const (
-	PLAYER_GREEN  Player = 1
-	PLAYER_YELLOW Player = 2
+	PLAYER_GREEN  Player = GREEN_PAWN
+	PLAYER_YELLOW Player = YELLOW_PAWN
 )
 
 const (
@@ -22,4 +22,11 @@ const (
 
 	EMPTY_RED  = "🟥"
 	EMPTY_BLUE = "🟦"
+)
+
+const (
+	DISPLAY_MARGIN = 5
+
+	BOARD_HEIGHT = 19
+	BOARD_WIDTH  = 55
 )

@@ -4,11 +4,6 @@ import (
 	"ZAD2_MinMax/utils"
 )
 
-const (
-	BOARD_HEIGHT = 19
-	BOARD_WIDTH  = 55
-)
-
 type BoardObject interface {
 	GetIcon() string
 	CanMoveHere() bool
@@ -106,6 +101,24 @@ func (b *Board) initMoves() {
 		}
 	}
 	return
+}
+
+func (b *Board) selectMove(pawn *Pawn) *Move {
+	x, y := utils.TakeInput("Select Your move")
+	for _, move := range pawn.ValidMoves {
+		if move.Direction.X == x && move.Direction.Y == y {
+			return &move
+		}
+	}
+	utils.PrintMessage("Invalid move")
+	return nil
+}
+
+func (b *Board) MovePawn(pawn *Pawn, move Move) {
+	b.Fields[pawn.Coords.Y][pawn.Coords.X] = EmptyField{utils.EMPTY_BLUE}
+	pawn.Coords = move.Direction
+	b.Fields[pawn.Coords.Y][pawn.Coords.X] = pawn
+	pawn.ValidMoves = nil
 }
 
 func getNeighbour(x, y, numberOfJumps int8) []Move {
