@@ -3,6 +3,10 @@ package utils
 type Player = string
 
 const (
+	DEPTH = 4
+)
+
+const (
 	PLAYER_GREEN  Player = GREEN_PAWN
 	PLAYER_YELLOW Player = YELLOW_PAWN
 )

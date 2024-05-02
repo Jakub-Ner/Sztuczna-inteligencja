@@ -1,7 +1,11 @@
 package halmaGame
 
+import (
+	"ZAD2_MinMax/utils"
+)
+
 type Pawn struct {
-	Icon       string
+	Icon       utils.Player
 	ValidMoves []Move
 	Coords     Coords
 }

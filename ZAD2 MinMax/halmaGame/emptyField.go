@@ -1,7 +1,9 @@
 package halmaGame
 
+import "ZAD2_MinMax/utils"
+
 type EmptyField struct {
-	Icon string
+	Icon utils.Player
 }
 
 func (e EmptyField) GetIcon() string {

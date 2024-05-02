@@ -2,8 +2,10 @@ package utils
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"os"
+	"runtime/debug"
 	"strconv"
 	"strings"
 )
@@ -14,6 +16,10 @@ func PrintMessage(message string) {
 	MoveCursor(BOARD_WIDTH+DISPLAY_MARGIN, DISPLAY_MARGIN+LineCounter)
 	fmt.Println(message)
 	LineCounter++
+}
+
+func GetGoroutine() string {
+	return " Go=" + string(bytes.Fields(debug.Stack())[1]) + " "
 }
 
 func MoveCursor(x, y int) {
