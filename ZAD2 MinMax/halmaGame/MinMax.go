@@ -5,10 +5,9 @@ import (
 )
 
 func MoveSelection(board *Board, currentPlayer utils.Player) (*Pawn, *Move) {
-	//currentPlayer =
 	originalMoves, originalPawns := getMovesAndPawns(board, &currentPlayer)
 
-	tree := NewNode(nil, *board, 0, 0, getOpponent(currentPlayer), nil, nil)
+	tree := NewNode(nil, *board, 0, currentPlayer, nil, nil)
 	channel := make(chan *Node, 1)
 	tree.selectScore(channel)
 
@@ -22,8 +21,5 @@ func MoveSelection(board *Board, currentPlayer utils.Player) (*Pawn, *Move) {
 			}
 		}
 	}
-	//println("Best score has: ", bestKid.pawn.String(), bestKid.move.String())
-
-	//return bestKid.pawn, bestKid.
 	return nil, nil
 }

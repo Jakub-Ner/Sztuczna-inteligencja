@@ -129,7 +129,12 @@ func (b *Board) MovePawn(pawn *Pawn, move Move) bool {
 		return false
 	}
 
-	b.Fields[pawn.Coords.Y][pawn.Coords.X] = EmptyField{utils.EMPTY_BLUE}
+	emptyFieldColor := utils.EMPTY_RED
+	if pawn.Coords.Y%2 == 0 {
+		emptyFieldColor = utils.EMPTY_BLUE
+	}
+
+	b.Fields[pawn.Coords.Y][pawn.Coords.X] = EmptyField{emptyFieldColor}
 	pawn.Coords = move.Direction
 	b.Fields[pawn.Coords.Y][pawn.Coords.X] = pawn
 	return true

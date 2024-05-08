@@ -48,5 +48,5 @@ func main() {
 	go handleExit(sig)
 
 	game := halmaGame.Game{}
-	game.RunGamePlayerVSPlayer()
+	game.RunGameComputerVSComputer()
 }
