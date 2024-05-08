@@ -3,7 +3,6 @@ package main
 import (
 	"ZAD2_MinMax/halmaGame"
 	"ZAD2_MinMax/utils"
-	"github.com/Codehardt/go-cpulimit"
 	"math"
 	"os"
 	"os/signal"
@@ -39,12 +38,7 @@ func findMin(parentChannel chan int) {
 }
 
 func main() {
-	limiter := &cpulimit.Limiter{
-		MaxCPUUsage:     80.0,              // throttle CPU usage to 50%
-		MeasureInterval: time.Second * 333, // measure cpu usage in an interval of 333 ms
-		Measurements:    3,                 // use the avg of the last 3 measurements
-	}
-	limiter.Start()
+
 	debug.SetMaxStack(math.MaxInt64)
 	debug.SetGCPercent(10000)
 	debug.SetMemoryLimit(math.MaxInt64)
@@ -53,11 +47,6 @@ func main() {
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	go handleExit(sig)
 
-	defer limiter.Stop()
-	for {
-		limiter.Wait() // wait until cpu usage is below 50%
-		game := halmaGame.Game{}
-		game.RunGameComputerVSComputer()
-	}
-
+	game := halmaGame.Game{}
+	game.RunGamePlayerVSPlayer()
 }

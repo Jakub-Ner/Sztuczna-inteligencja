@@ -15,35 +15,19 @@ type Board struct {
 }
 
 func (b *Board) ResetPawns() {
-	var pawn string
-	pawn = utils.PLAYER_GREEN
 	pawnCounter := 0
-	for i := int8(0); i <= 6; i++ {
-		for j := int8(5); j >= i; j-- {
-			if i == 0 && j == 0 {
-				b.Fields[0][10] = EmptyField{utils.EMPTY_RED}
-			} else if i == 5 && j == 5 {
-				b.Fields[5][15] = EmptyField{utils.EMPTY_RED}
-			} else {
-				p := NewPawn(pawn, Coords{j + 10, i})
-				b.Fields[i][j+10] = p
+
+	boardPattern := utils.ReadBoardFromFile("boards/initial_board.txt")
+	for i := int8(0); i < utils.COLUMNS; i++ {
+		for j := int8(0); j < utils.COLUMNS; j++ {
+			if boardPattern[i][j] == 1 {
+				p := NewPawn(utils.PLAYER_YELLOW, Coords{j, i})
+				b.Fields[i][j] = p
 				b.Pawns[pawnCounter] = p
 				pawnCounter++
-			}
-
-		}
-	}
-
-	pawn = utils.PLAYER_YELLOW
-	for i := int8(15); i >= 10; i-- {
-		for j := int8(10); j <= i; j++ {
-			if i == 10 && j == 10 {
-				b.Fields[10][0] = EmptyField{utils.EMPTY_BLUE}
-			} else if i == 15 && j == 15 {
-				b.Fields[15][5] = EmptyField{utils.EMPTY_BLUE}
-			} else {
-				p := NewPawn(pawn, Coords{j - 10, i})
-				b.Fields[i][j-10] = p
+			} else if boardPattern[i][j] == 2 {
+				p := NewPawn(utils.PLAYER_GREEN, Coords{j, i})
+				b.Fields[i][j] = p
 				b.Pawns[pawnCounter] = p
 				pawnCounter++
 			}
@@ -85,6 +69,9 @@ func canJump(from Coords, to *Coords, b Board) bool {
 
 func (b *Board) UpdateMoves() {
 	for _, pawn := range b.Pawns {
+		if pawn == nil {
+			continue
+		}
 		pawn.ValidMoves = nil
 		potentialMoves := getNeighbour(pawn.Coords.X, pawn.Coords.Y, 0)
 		for _, move := range potentialMoves {

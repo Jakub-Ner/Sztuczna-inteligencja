@@ -56,3 +56,24 @@ func TakeInput(message string) (int8, int8) {
 	}
 	return int8(x), int8(y)
 }
+
+func ReadBoardFromFile(filename string) [COLUMNS][COLUMNS]int8 {
+	file, err := os.Open(filename)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	boardPattern := [COLUMNS][COLUMNS]int8{}
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		line = strings.ReplaceAll(line, ",", "")
+		for i, char := range line {
+			boardPattern[LineCounter][int8(i)] = int8(char - '0')
+		}
+		LineCounter++
+	}
+	return boardPattern
+}
