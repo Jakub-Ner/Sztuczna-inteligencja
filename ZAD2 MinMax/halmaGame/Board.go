@@ -37,7 +37,6 @@ func (b *Board) ResetPawns() {
 }
 
 func (b *Board) Reset() {
-	// Fill the halmaGame with empty fields
 	for i := int8(0); i < utils.COLUMNS; i++ {
 		for j := int8(0); j < utils.COLUMNS; j++ {
 			if i%2 == j%2 {
@@ -60,10 +59,16 @@ func validateMove(x, y int8) bool {
 	return x >= 0 && x < utils.COLUMNS && y >= 0 && y < utils.COLUMNS
 }
 
+func getDirection(from, to int8) int8 {
+	if from < to {
+		return 1
+	} else if from > to {
+		return -1
+	}
+	return 0
+}
 func canJump(from Coords, to *Coords, b Board) bool {
-	diffX := to.X - from.X
-	diffY := to.Y - from.Y
-	to.X, to.Y = to.X+diffX, to.Y+diffY
+	to.X, to.Y = to.X+getDirection(from.X, to.X), to.Y+getDirection(from.Y, to.Y)
 	return validateMove(to.X, to.Y) && b.Fields[to.Y][to.X].CanMoveHere()
 }
 
@@ -75,22 +80,34 @@ func (b *Board) UpdateMoves() {
 		pawn.ValidMoves = nil
 		potentialMoves := getNeighbour(pawn.Coords.X, pawn.Coords.Y, 0)
 		for _, move := range potentialMoves {
-			if b.Fields[move.Direction.Y][move.Direction.X].CanMoveHere() && move.NumberOfJumps == 0 {
+			if b.Fields[move.Direction.Y][move.Direction.X].CanMoveHere() {
 				move.NumberOfJumps = 0
 				m := move
 				pawn.ValidMoves = append(pawn.ValidMoves, m)
 			} else {
-				if canJump(pawn.Coords, &move.Direction, *b) {
-					move.NumberOfJumps = +1
-					m := move
-					pawn.ValidMoves = append(pawn.ValidMoves, m)
-					newNeighbours := getNeighbour(move.Direction.X, move.Direction.Y, move.NumberOfJumps)
-					potentialMoves = append(potentialMoves, newNeighbours...)
-				}
+				b.checkJumpMoves(pawn, pawn.Coords, move, 0)
 			}
 		}
 	}
 	return
+}
+
+func (b *Board) checkJumpMoves(pawn *Pawn, from Coords, move Move, ttl int8) {
+	if ttl == 10 {
+		return
+	}
+	if canJump(from, &move.Direction, *b) {
+		move.NumberOfJumps = +1
+		m := move
+		pawn.ValidMoves = append(pawn.ValidMoves, m)
+
+		from = move.Direction
+		for _, neighbour := range getNeighbour(move.Direction.X, move.Direction.Y, move.NumberOfJumps) {
+			if b.Fields[neighbour.Direction.Y][neighbour.Direction.X].CanMoveHere() == false {
+				b.checkJumpMoves(pawn, from, neighbour, ttl+1)
+			}
+		}
+	}
 }
 
 func (b *Board) selectMove(pawn *Pawn) *Move {
@@ -109,7 +126,6 @@ func (b *Board) MovePawn(pawn *Pawn, move Move) bool {
 		defer func() {
 			pawn.ValidMoves = nil // clear the valid moves
 		}()
-		//fmt.Println("Invalid move", pawn.String(), move.Direction.X, move.Direction.Y, "\n")
 		return false
 	}
 
