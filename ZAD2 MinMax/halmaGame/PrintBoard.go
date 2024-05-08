@@ -20,7 +20,7 @@ func (b *Board) selectPawn(currentPlayer utils.Player) *Pawn {
 		if ok && pawn.Icon == currentPlayer {
 			return pawn
 		}
-		utils.PrintMessage("Invalid pawn selected")
+		//utils.PrintMessage("Invalid pawn selected")
 	}
 }
 

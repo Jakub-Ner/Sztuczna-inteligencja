@@ -11,103 +11,108 @@ type Node struct {
 	Parent   *Node  // passed to children
 	score    int    // to be calculated
 
-	board        Board                       // passed to children
-	pawn         Pawn                        // to be calculated
-	move         Move                        // to be calculated
-	nestingLevel int                         // passed to children
-	comparator   func(val int, max int) bool // to be calculated
+	currentPlayer utils.Player
+	board         Board                       // passed to children
+	pawn          *Pawn                       // to be calculated
+	initialCords  *Coords                     // to be calculated
+	nestingLevel  int8                        // passed to children
+	comparator    func(val int, max int) bool // to be calculated
 }
 
-func getMovesAndPawns(board *Board) ([]Move, []Pawn) {
-	// TODO: return only moves for the current player
-	//var startingPawnIdx int8
-	//if board.CurrentPlayer == utils.PLAYER_GREEN {
-	//	startingPawnIdx = 0
-	//} else {
-	//	startingPawnIdx = utils.PAWNS_PER_PLAYER
-	//}
-	fmt.Println("Try:  update moves:", utils.GetGoroutine())
-	err := board.UpdateMoves()
-	if err != nil {
-		fmt.Println("Error: update moves:", err)
+func getMovesAndPawns(board *Board, currentPlayer *utils.Player) ([]Move, []*Pawn) {
+	var startingPawnIdx int8
+	if *currentPlayer == utils.PLAYER_GREEN {
+		startingPawnIdx = 0
+	} else {
+		startingPawnIdx = utils.PAWNS_PER_PLAYER
 	}
-	fmt.Println("Done: update moves:", utils.GetGoroutine())
-	moves := make([]Move, 0, 80)
-	pawns := make([]Pawn, 0, 80)
-	for _, pawn := range board.Pawns {
+	board.UpdateMoves()
+
+	moves := make([]Move, 0, 40)
+	pawns := make([]*Pawn, 0, 40)
+	for i := startingPawnIdx; i < startingPawnIdx+utils.PAWNS_PER_PLAYER; i++ {
+		pawn := board.Pawns[i]
 		for _, move := range pawn.ValidMoves {
 			moves = append(moves, move)
-			pawns = append(pawns, *pawn)
+			pawns = append(pawns, pawn)
 		}
 	}
 	return moves, pawns
 }
 
-func isOpponent(nestingLevel int) bool {
+func isOpponent(nestingLevel int8) bool {
 	return nestingLevel%2 == 1
 }
 
-func NewNode(parent *Node, board Board, nestingLevel int, score int) *Node {
+func NewNode(parent *Node, board Board, nestingLevel int8, score int, nextPlayer utils.Player, pawn *Pawn, initialCords *Coords) *Node {
 	comparator := findMax
 	if isOpponent(nestingLevel) {
 		comparator = findMin
 	}
-	par := parent
+	//par := parent
 	bor := board
 	return &Node{
-		Children:     make([]Node, 0),
-		Parent:       par,
-		score:        score,
-		board:        bor,
-		pawn:         Pawn{},
-		move:         Move{},
-		nestingLevel: nestingLevel,
-		comparator:   comparator,
+		Children:      make([]Node, 0),
+		Parent:        parent,
+		score:         score,
+		currentPlayer: nextPlayer,
+		board:         bor,
+		pawn:          pawn,
+		initialCords:  initialCords,
+		nestingLevel:  nestingLevel,
+		comparator:    comparator,
 	}
 }
 
 func (node *Node) String() string {
-	return fmt.Sprintf("Node{score: %d, nestingLevel: %d, pawnNum: %d, moveNum: %d, boardAddr: %p}", node.score, node.nestingLevel, len(node.Children), len(node.Children), &node.board)
+	return fmt.Sprintf("Node{score: %d, nestingLevel: %d, pawnAddr: %p, parrentAddr: %p}", node.score, node.nestingLevel, node, node.Parent)
 }
 
-func (node *Node) selectScore(parentChannel chan int) {
-	if node.nestingLevel >= utils.DEPTH {
-		parentChannel <- node.score
+func (node *Node) selectScore(parentChannel chan *Node) {
+	defer func() {
+		fmt.Printf("Node: %s\n", node.String())
+	}()
+	if node.nestingLevel > utils.DEPTH {
+		parentChannel <- node
 		return
 	}
 
-	//fmt.Println("getting moves and pawns", node.String(), utils.GetGoroutine())
-	moves, pawns := getMovesAndPawns(&node.board)
+	moves, pawns := getMovesAndPawns(&node.board, &node.currentPlayer)
+	nextPlayer := getOpponent(node.currentPlayer)
 	for i := range moves {
-		newBoard := node.board
-		currentPawn := pawns[i]
-		//fmt.Println("trying to move pawn", currentPawn.String(), "to", moves[i].String(), utils.GetGoroutine())
-		newBoard.MovePawn(&currentPawn, moves[i])
-		//fmt.Println("moved pawn", currentPawn.String(), "to", moves[i].String(), utils.GetGoroutine())
-
-		newNode := NewNode(node, newBoard, node.nestingLevel+1, int(moves[i].NumberOfJumps)+node.score) // use heuristic
+		currentPawn := *pawns[i]
+		initialPosition := &pawns[i].Coords
+		done := node.board.MovePawn(&currentPawn, moves[i])
+		if !done {
+			continue
+		}
+		newNode := NewNode(node, node.board, node.nestingLevel+1, int(moves[i].NumberOfJumps)+node.score, nextPlayer, &currentPawn, initialPosition) // use heuristic
 		node.Children = append(node.Children, *newNode)
 	}
 
-	channelForKids := make(chan int, len(node.Children))
-	for _, child := range node.Children {
-		go child.selectScore(channelForKids)
+	channelForKids := make(chan *Node, len(node.Children))
+	if !isOpponent(node.nestingLevel) {
+		for _, child := range node.Children {
+			go child.selectScore(channelForKids)
+		}
+	} else {
+		for _, child := range node.Children {
+			child.selectScore(parentChannel)
+		}
 	}
-
 	node.score = 0
 	if isOpponent(node.nestingLevel) {
 		node.score = math.MaxInt
 	}
 	for range node.Children {
-		val := <-channelForKids
-		if node.comparator(val, node.score) {
-			node.score = val
-			//node.pawn
-			//node.move
+		kidNode := <-channelForKids
+		if node.comparator(kidNode.score, node.score) {
+			node.score = kidNode.score
 		}
 	}
-	fmt.Println("sending score to parent", node.String())
-	parentChannel <- node.score
+	//fmt.Printf("Best score for a parent %p, %s=%s", node, node.pawn.String(), node.move.String())
+
+	parentChannel <- node
 }
 
 func findMax(val int, max int) bool {

@@ -3,7 +3,7 @@ package utils
 type Player = string
 
 const (
-	DEPTH = 4
+	DEPTH = 16
 )
 
 const (

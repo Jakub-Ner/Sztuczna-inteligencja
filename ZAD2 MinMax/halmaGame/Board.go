@@ -2,7 +2,6 @@ package halmaGame
 
 import (
 	"ZAD2_MinMax/utils"
-	"fmt"
 )
 
 type BoardObject interface {
@@ -11,9 +10,8 @@ type BoardObject interface {
 }
 
 type Board struct {
-	Fields        [utils.COLUMNS][utils.COLUMNS]BoardObject
-	Pawns         [utils.PAWNS]*Pawn
-	CurrentPlayer utils.Player
+	Fields [utils.COLUMNS][utils.COLUMNS]BoardObject
+	Pawns  [utils.PAWNS]*Pawn
 }
 
 func (b *Board) ResetPawns() {
@@ -85,41 +83,27 @@ func canJump(from Coords, to *Coords, b Board) bool {
 	return validateMove(to.X, to.Y) && b.Fields[to.Y][to.X].CanMoveHere()
 }
 
-func (b *Board) UpdateMoves() error {
-	//fmt.Println("Try on board:", &b, "update moves:", utils.GetGoroutine())
-	fmt.Printf("board=%p %s", b, utils.GetGoroutine())
+func (b *Board) UpdateMoves() {
 	for _, pawn := range b.Pawns {
-		//fmt.Println("Try pawn:", pawn.String(), utils.GetGoroutine())
 		pawn.ValidMoves = nil
 		potentialMoves := getNeighbour(pawn.Coords.X, pawn.Coords.Y, 0)
-		//fmt.Println("Potential moves: ", potentialMoves, utils.GetGoroutine())
 		for _, move := range potentialMoves {
-			//println()
 			if b.Fields[move.Direction.Y][move.Direction.X].CanMoveHere() && move.NumberOfJumps == 0 {
-				//fmt.Printf("1)pawn=%p %s", &pawn, utils.GetGoroutine())
 				move.NumberOfJumps = 0
 				m := move
-				fmt.Println("Move:", m, "will be added to", pawn.ValidMoves, utils.GetGoroutine())
 				pawn.ValidMoves = append(pawn.ValidMoves, m)
-				//fmt.Print(2, utils.GetGoroutine())
 			} else {
 				if canJump(pawn.Coords, &move.Direction, *b) {
-					//fmt.Printf("3)pawn=%p %s", &pawn, utils.GetGoroutine())
 					move.NumberOfJumps = +1
 					m := move
-					fmt.Println("Move: ", m, "will be added to", pawn.ValidMoves, utils.GetGoroutine())
 					pawn.ValidMoves = append(pawn.ValidMoves, m)
-					//fmt.Print(4, utils.GetGoroutine())
 					newNeighbours := getNeighbour(move.Direction.X, move.Direction.Y, move.NumberOfJumps)
-					//fmt.Print(5, utils.GetGoroutine())
 					potentialMoves = append(potentialMoves, newNeighbours...)
-					//fmt.Print(6, utils.GetGoroutine())
 				}
 			}
 		}
 	}
-	//fmt.Println("Done on board:", &b, "update moves:", utils.GetGoroutine())
-	return nil
+	return
 }
 
 func (b *Board) selectMove(pawn *Pawn) *Move {
@@ -129,22 +113,23 @@ func (b *Board) selectMove(pawn *Pawn) *Move {
 			return &move
 		}
 	}
-	utils.PrintMessage("Invalid move")
+	//utils.PrintMessage("Invalid move")
 	return nil
 }
 
-func (b *Board) MovePawn(pawn *Pawn, move Move) {
+func (b *Board) MovePawn(pawn *Pawn, move Move) bool {
 	if b.Fields[move.Direction.Y][move.Direction.X].CanMoveHere() == false {
 		defer func() {
 			pawn.ValidMoves = nil // clear the valid moves
 		}()
-		fmt.Println("Invalid move", pawn.String(), move.Direction.X, move.Direction.Y, "\n")
-		return
+		//fmt.Println("Invalid move", pawn.String(), move.Direction.X, move.Direction.Y, "\n")
+		return false
 	}
 
 	b.Fields[pawn.Coords.Y][pawn.Coords.X] = EmptyField{utils.EMPTY_BLUE}
 	pawn.Coords = move.Direction
 	b.Fields[pawn.Coords.Y][pawn.Coords.X] = pawn
+	return true
 }
 
 func getNeighbour(x, y, numberOfJumps int8) []Move {

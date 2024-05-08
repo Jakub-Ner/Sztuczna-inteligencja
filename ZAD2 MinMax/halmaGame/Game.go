@@ -68,5 +68,5 @@ func (g *Game) RunGameComputerVSComputer() {
 }
 
 func (g *Game) minMaxMoveSelection() (*Pawn, *Move) {
-	return MoveSelection(g.board)
+	return MoveSelection(g.board, g.currentPlayer)
 }
