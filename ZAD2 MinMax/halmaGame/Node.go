@@ -7,12 +7,12 @@ import (
 )
 
 type Node struct {
-	Children []Node // to be calculated
-	Parent   *Node  // passed to children
-	score    int    // to be calculated
+	Children []*Node // to be calculated
+	Parent   *Node   // passed to children
+	score    int     // to be calculated
 
 	currentPlayer utils.Player
-	board         Board                       // passed to children
+	board         *Board                      // passed to children
 	pawn          *Pawn                       // to be calculated
 	initialCords  *Coords                     // to be calculated
 	nestingLevel  int8                        // passed to children
@@ -44,18 +44,18 @@ func isOpponent(nestingLevel int8) bool {
 	return nestingLevel%2 == 1
 }
 
-func NewNode(parent *Node, board Board, nestingLevel int8, nextPlayer utils.Player, pawn *Pawn, initialCords *Coords) *Node {
+func NewNode(parent *Node, board *Board, nestingLevel int8, nextPlayer utils.Player, pawn *Pawn, initialCords *Coords) *Node {
 	comparator := findMax
 	if isOpponent(nestingLevel) {
 		comparator = findMin
 	}
-	bor := board
+
 	return &Node{
-		Children:      make([]Node, 0),
+		Children:      make([]*Node, 0),
 		Parent:        parent,
 		score:         0,
 		currentPlayer: nextPlayer,
-		board:         bor,
+		board:         board,
 		pawn:          pawn,
 		initialCords:  initialCords,
 		nestingLevel:  nestingLevel,
@@ -64,50 +64,86 @@ func NewNode(parent *Node, board Board, nestingLevel int8, nextPlayer utils.Play
 }
 
 func (node *Node) String() string {
-	return fmt.Sprintf("Node{score: %d, nestingLevel: %d, pawnAddr: %p, parrentAddr: %p}", node.score, node.nestingLevel, node, node.Parent)
+	return fmt.Sprintf("%p : score: %d, kids: %d", node.Parent, node.score, len(node.Children))
 }
 
-func (node *Node) selectScore(parentChannel chan *Node) {
+func (node *Node) selectScore(parentChannel chan struct {
+	*Node
+	int8
+}, kidIdx int8) {
+	//defer func() {
+	//	tab := ""
+	//	for i := int8(0); i < node.nestingLevel; i++ {
+	//		tab += "\t"
+	//	}
+	//	fmt.Println(tab, node.String())
+	//}()
 	if node.nestingLevel == utils.DEPTH {
-		node.score = DistanceScore(&node.board, node.currentPlayer)
-		parentChannel <- node
+		node.score = DistanceScore(node.board, getOpponent(node.currentPlayer))
+		parentChannel <- struct {
+			*Node
+			int8
+		}{node, kidIdx}
 		return
 	}
 
-	moves, pawns := getMovesAndPawns(&node.board, &node.currentPlayer)
+	moves, pawns := getMovesAndPawns(node.board, &node.currentPlayer)
 	nextPlayer := getOpponent(node.currentPlayer)
+
 	for i := range moves {
-		currentPawn := *pawns[i]
+		currentBoard := new(Board)
+		*currentBoard = *node.board
+
+		currentBoard.Pawns = [utils.PAWNS]*Pawn{}
+		for i := int8(0); i < utils.PAWNS; i++ {
+			currentBoard.Pawns[i] = new(Pawn)
+			*currentBoard.Pawns[i] = *node.board.Pawns[i]
+		}
+		var currentPawn *Pawn
+		for _, pawn := range currentBoard.Pawns {
+			if pawns[i].Coords.X == pawn.Coords.X && pawns[i].Coords.Y == pawn.Coords.Y {
+				currentPawn = pawn
+				break
+			}
+		}
 		initialPosition := &pawns[i].Coords
-		done := node.board.MovePawn(&currentPawn, moves[i])
+		done := currentBoard.MovePawn(currentPawn, moves[i])
 		if !done {
 			continue
 		}
-		newNode := NewNode(node, node.board, node.nestingLevel+1, nextPlayer, &currentPawn, initialPosition)
-		node.Children = append(node.Children, *newNode)
+		newNode := NewNode(node, currentBoard, node.nestingLevel+1, nextPlayer, currentPawn, initialPosition)
+		node.Children = append(node.Children, newNode)
 	}
-
-	channelForKids := make(chan *Node, len(node.Children))
-	if false { // !isOpponent(node.nestingLevel)
-		for _, child := range node.Children {
-			go child.selectScore(channelForKids)
+	//fmt.Println("Children: ", len(node.Children))
+	channelForKids := make(chan struct {
+		*Node
+		int8
+	}, len(node.Children))
+	if !isOpponent(node.nestingLevel) { // !isOpponent(node.nestingLevel)
+		for i, child := range node.Children {
+			go child.selectScore(channelForKids, int8(i))
 		}
 	} else {
-		for _, child := range node.Children {
-			child.selectScore(channelForKids)
+		for i, child := range node.Children {
+			child.selectScore(channelForKids, int8(i))
 		}
 	}
 	node.score = 0
 	if isOpponent(node.nestingLevel) {
 		node.score = math.MaxInt
 	}
+	bestIdx := int8(-1)
 	for range node.Children {
 		kidNode := <-channelForKids
 		if node.comparator(kidNode.score, node.score) {
 			node.score = kidNode.score
+			bestIdx = kidNode.int8
 		}
 	}
-	parentChannel <- node
+	parentChannel <- struct {
+		*Node
+		int8
+	}{node, bestIdx}
 }
 
 func findMax(val int, max int) bool {

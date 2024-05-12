@@ -7,8 +7,12 @@ type Coords struct {
 	Y int8
 }
 
-func (c Coords) String() string {
+func (c *Coords) String() string {
 	return fmt.Sprintf("(x=%d, y=%d)", c.X, c.Y)
+}
+
+func (c *Coords) Distance(other Coords) int8 {
+	return int8((c.X-other.X)*(c.X-other.X) + (c.Y-other.Y)*(c.Y-other.Y))
 }
 
 type Move struct {

@@ -8,7 +8,6 @@ import (
 	"os/signal"
 	"runtime/debug"
 	"syscall"
-	"time"
 )
 
 func handleExit(sig chan os.Signal) {
@@ -17,30 +16,26 @@ func handleExit(sig chan os.Signal) {
 	os.Exit(0)
 }
 
-func sendSignals(parentChannel chan int) {
-	for i := 0; i < 5; i++ {
-		parentChannel <- i
-		time.Sleep(1 * time.Second)
-	}
-	print("All signals sent")
-	close(parentChannel)
-}
+func testBoardCopy() {
+	board := halmaGame.NewBoard()
+	board.Print()
+	boardCopy := new(halmaGame.Board)
+	*boardCopy = *board
 
-func findMin(parentChannel chan int) {
-	min := 1000
-	for i := range parentChannel {
-		if i < min {
-			min = i
-		}
-		print("Received: ", i, "\n")
-	}
-	print("Min: ", min)
+	board.MovePawn(board.Pawns[19], halmaGame.Move{0, halmaGame.Coords{2, 2}})
+	board.Print()
+	boardCopy.Print()
+
+	boardCopy.MovePawn(board.Pawns[19], halmaGame.Move{0, halmaGame.Coords{5, 2}})
+	board.Print()
+	boardCopy.Print()
 }
 
 func main() {
+	//testBoardCopy()
 
 	debug.SetMaxStack(math.MaxInt64)
-	debug.SetGCPercent(10000)
+	//debug.SetGCPercent(10000)
 	debug.SetMemoryLimit(math.MaxInt64)
 	debug.SetMaxThreads(math.MaxInt64)
 	sig := make(chan os.Signal, 1)

@@ -15,7 +15,8 @@ type Board struct {
 }
 
 func (b *Board) ResetPawns() {
-	pawnCounter := 0
+	greenPawnCounter := 0
+	yellowPawnCounter := utils.PAWNS_PER_PLAYER
 
 	boardPattern := utils.ReadBoardFromFile("boards/initial_board.txt")
 	for i := int8(0); i < utils.COLUMNS; i++ {
@@ -23,13 +24,13 @@ func (b *Board) ResetPawns() {
 			if boardPattern[i][j] == 1 {
 				p := NewPawn(utils.PLAYER_YELLOW, Coords{j, i})
 				b.Fields[i][j] = p
-				b.Pawns[pawnCounter] = p
-				pawnCounter++
+				b.Pawns[yellowPawnCounter] = p
+				yellowPawnCounter++
 			} else if boardPattern[i][j] == 2 {
 				p := NewPawn(utils.PLAYER_GREEN, Coords{j, i})
 				b.Fields[i][j] = p
-				b.Pawns[pawnCounter] = p
-				pawnCounter++
+				b.Pawns[greenPawnCounter] = p
+				greenPawnCounter++
 			}
 		}
 	}
@@ -92,6 +93,15 @@ func (b *Board) UpdateMoves() {
 	return
 }
 
+func isUniqueMove(moves []Move, move Move) bool {
+	for _, m := range moves {
+		if m.Direction.X == move.Direction.X && m.Direction.Y == move.Direction.Y {
+			return false
+		}
+	}
+	return true
+}
+
 func (b *Board) checkJumpMoves(pawn *Pawn, from Coords, move Move, ttl int8) {
 	if ttl == 10 {
 		return
@@ -99,7 +109,9 @@ func (b *Board) checkJumpMoves(pawn *Pawn, from Coords, move Move, ttl int8) {
 	if canJump(from, &move.Direction, *b) {
 		move.NumberOfJumps = +1
 		m := move
-		pawn.ValidMoves = append(pawn.ValidMoves, m)
+		if isUniqueMove(pawn.ValidMoves, m) {
+			pawn.ValidMoves = append(pawn.ValidMoves, m)
+		}
 
 		from = move.Direction
 		for _, neighbour := range getNeighbour(move.Direction.X, move.Direction.Y, move.NumberOfJumps) {
@@ -130,12 +142,13 @@ func (b *Board) MovePawn(pawn *Pawn, move Move) bool {
 	}
 
 	emptyFieldColor := utils.EMPTY_RED
-	if pawn.Coords.Y%2 == 0 {
+	if pawn.Coords.Y%2 != pawn.Coords.X%2 {
 		emptyFieldColor = utils.EMPTY_BLUE
 	}
 
 	b.Fields[pawn.Coords.Y][pawn.Coords.X] = EmptyField{emptyFieldColor}
-	pawn.Coords = move.Direction
+	pawn.Coords.X = move.Direction.X
+	pawn.Coords.Y = move.Direction.Y
 	b.Fields[pawn.Coords.Y][pawn.Coords.X] = pawn
 	return true
 }
