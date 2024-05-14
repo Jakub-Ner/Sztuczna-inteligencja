@@ -5,9 +5,11 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"reflect"
 	"runtime/debug"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var LineCounter = 0
@@ -76,4 +78,29 @@ func ReadBoardFromFile(filename string) [COLUMNS][COLUMNS]int8 {
 		LineCounter++
 	}
 	return boardPattern
+}
+
+func CountAndShowTime(f interface{}, args ...interface{}) []reflect.Value {
+	// Ensure the input is a function
+	funcValue := reflect.ValueOf(f)
+	if funcValue.Kind() != reflect.Func {
+		panic("CountAndShowTime: expected a function")
+	}
+
+	// Convert arguments to reflect.Value
+	in := make([]reflect.Value, len(args))
+	for i, arg := range args {
+		in[i] = reflect.ValueOf(arg)
+	}
+
+	// Measure the execution time
+	before := time.Now()
+	result := funcValue.Call(in)
+	after := time.Now()
+
+	// Print the elapsed time
+	elapsed := after.Sub(before).Milliseconds()
+	fmt.Println("Finished in:", strconv.FormatInt(elapsed, 10)+"ms")
+
+	return result
 }

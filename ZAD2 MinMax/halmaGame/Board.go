@@ -103,7 +103,7 @@ func isUniqueMove(moves []Move, move Move) bool {
 }
 
 func (b *Board) checkJumpMoves(pawn *Pawn, from Coords, move Move, ttl int8) {
-	if ttl == 10 {
+	if ttl == 5 {
 		return
 	}
 	if canJump(from, &move.Direction, *b) {
