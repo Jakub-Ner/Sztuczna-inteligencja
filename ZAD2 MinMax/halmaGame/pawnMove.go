@@ -11,8 +11,21 @@ func (c *Coords) String() string {
 	return fmt.Sprintf("(x=%d, y=%d)", c.X, c.Y)
 }
 
-func (c *Coords) Distance(other Coords) int8 {
-	return int8((c.X-other.X)*(c.X-other.X) + (c.Y-other.Y)*(c.Y-other.Y))
+func (c *Coords) DistanceSquare(other Coords) int {
+	xDist := int(c.X - other.X)
+	yDist := int(c.Y - other.Y)
+	return (xDist * xDist) + (yDist * yDist)
+}
+
+func (c *Coords) DistanceManhattan(other Coords) int {
+	return int(abs(c.X-other.X) + abs(c.Y-other.Y))
+}
+
+func abs(number int8) int8 {
+	if number < 0 {
+		return -number
+	}
+	return number
 }
 
 type Move struct {
