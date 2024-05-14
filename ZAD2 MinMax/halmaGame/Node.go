@@ -52,26 +52,18 @@ func (node *Node) String() string {
 	return fmt.Sprintf("score: %d, kids: %d", node.score, len(node.Children))
 }
 
-var heuristic Heuristic
-var visitedNodesCounter int64
-var prunedNodesCounter int64
-
-var visitedon1Level int64
-var visitedon2Level int64
-var visitedon3Level int64
-
 func (node *Node) selectScore(parentChannel chan struct {
 	*Node
 	int8
 }, kidIdx int8, board *Board, nestingLevel int8, currentPlayer utils.Player) {
 	defer func() {
-		atomic.AddInt64(&visitedNodesCounter, 1)
+		atomic.AddInt64(&_visitedNodesCounter, 1)
 		if nestingLevel == 1 {
-			atomic.AddInt64(&visitedon1Level, 1)
+			atomic.AddInt64(&_visitedon1Level, 1)
 		} else if nestingLevel == 2 {
-			atomic.AddInt64(&visitedon2Level, 1)
+			atomic.AddInt64(&_visitedon2Level, 1)
 		} else if nestingLevel == 3 {
-			atomic.AddInt64(&visitedon3Level, 1)
+			atomic.AddInt64(&_visitedon3Level, 1)
 		}
 	}()
 	comparator := findMax
@@ -84,7 +76,7 @@ func (node *Node) selectScore(parentChannel chan struct {
 		if isOpponent(nestingLevel) {
 			opponent = getOpponent(currentPlayer)
 		}
-		node.score = heuristic(board, opponent)
+		node.score = _heuristic(board, opponent)
 		parentChannel <- struct {
 			*Node
 			int8
@@ -118,13 +110,20 @@ func (node *Node) selectScore(parentChannel chan struct {
 		}
 
 		initialPosition := &pawns[i].Coords
-		currentBoard.MovePawn(currentPawn, moves[i])
 		//if !done {
 		//	continue
 		//}
 		newNode := NewNode(currentPawn, initialPosition)
 		node.Children = append(node.Children, newNode)
-
+		currentBoard.MovePawn(currentPawn, moves[i])
+		if validateResult(board) != "" {
+			node.score = 100_000
+			parentChannel <- struct {
+				*Node
+				int8
+			}{node, kidIdx}
+			return
+		}
 		if true { // !isOpponent(nestingLevel)
 			go newNode.selectScore(channelForKids, int8(i), currentBoard, nestingLevel+1, getOpponent(currentPlayer))
 		} else {
@@ -152,13 +151,13 @@ func (node *Node) selectScore(parentChannel chan struct {
 
 func (node *Node) selectScoreAlphaBeta(board *Board, nestingLevel int8, currentPlayer utils.Player, alpha, beta int) int {
 	defer func() {
-		atomic.AddInt64(&visitedNodesCounter, 1)
+		atomic.AddInt64(&_visitedNodesCounter, 1)
 		if nestingLevel == 1 {
-			atomic.AddInt64(&visitedon1Level, 1)
+			atomic.AddInt64(&_visitedon1Level, 1)
 		} else if nestingLevel == 2 {
-			atomic.AddInt64(&visitedon2Level, 1)
+			atomic.AddInt64(&_visitedon2Level, 1)
 		} else if nestingLevel == 3 {
-			atomic.AddInt64(&visitedon3Level, 1)
+			atomic.AddInt64(&_visitedon3Level, 1)
 		}
 	}()
 	if nestingLevel == utils.DEPTH {
@@ -166,7 +165,7 @@ func (node *Node) selectScoreAlphaBeta(board *Board, nestingLevel int8, currentP
 		if isOpponent(nestingLevel) {
 			opponent = getOpponent(currentPlayer)
 		}
-		node.score = heuristic(board, opponent)
+		node.score = _heuristic(board, opponent)
 		return node.score
 	}
 
@@ -207,6 +206,10 @@ func (node *Node) selectScoreAlphaBeta(board *Board, nestingLevel int8, currentP
 		//}
 		newNode := NewNode(currentPawn, initialPosition)
 		node.Children = append(node.Children, newNode)
+		if validateResult(board) != "" {
+			node.score = 100_000
+			return node.score
+		}
 		newNodeScore := newNode.selectScoreAlphaBeta(currentBoard, nestingLevel+1, getOpponent(currentPlayer), alpha, beta)
 
 		if comparator(newNodeScore, node.score) {
@@ -216,13 +219,13 @@ func (node *Node) selectScoreAlphaBeta(board *Board, nestingLevel int8, currentP
 		if isOpponent(nestingLevel) {
 			alpha = max(alpha, newNodeScore)
 			if beta <= alpha {
-				atomic.AddInt64(&prunedNodesCounter, 1)
+				atomic.AddInt64(&_prunedNodesCounter, 1)
 				return node.score
 			}
 		} else {
 			beta = min(beta, newNodeScore)
 			if beta <= alpha {
-				atomic.AddInt64(&prunedNodesCounter, 1)
+				atomic.AddInt64(&_prunedNodesCounter, 1)
 				return node.score
 			}
 		}

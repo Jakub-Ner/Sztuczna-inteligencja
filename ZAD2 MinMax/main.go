@@ -16,24 +16,7 @@ func handleExit(sig chan os.Signal) {
 	os.Exit(0)
 }
 
-func testBoardCopy() {
-	board := halmaGame.NewBoard()
-	board.Print()
-	boardCopy := new(halmaGame.Board)
-	*boardCopy = *board
-
-	board.MovePawn(board.Pawns[19], halmaGame.Move{0, halmaGame.Coords{2, 2}})
-	board.Print()
-	boardCopy.Print()
-
-	boardCopy.MovePawn(board.Pawns[19], halmaGame.Move{0, halmaGame.Coords{5, 2}})
-	board.Print()
-	boardCopy.Print()
-}
-
 func main() {
-	//testBoardCopy()
-
 	debug.SetMaxStack(math.MaxInt64)
 	//debug.SetGCPercent(10000)
 	debug.SetMemoryLimit(math.MaxInt64)
@@ -44,4 +27,6 @@ func main() {
 
 	game := halmaGame.Game{}
 	game.RunGameComputerVSComputer()
+
+	utils.MoveCursor(0, utils.BOARD_HEIGHT+1)
 }

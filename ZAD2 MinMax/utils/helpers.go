@@ -6,18 +6,19 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"runtime"
 	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
 )
 
-var LineCounter = 0
+var _lineCounter = 0
 
 func PrintMessage(message string) {
-	MoveCursor(BOARD_WIDTH+DISPLAY_MARGIN, DISPLAY_MARGIN+LineCounter)
+	MoveCursor(BOARD_WIDTH+DISPLAY_MARGIN, DISPLAY_MARGIN+_lineCounter)
 	fmt.Println(message)
-	LineCounter++
+	_lineCounter++
 }
 
 func GetGoroutine() string {
@@ -30,14 +31,14 @@ func MoveCursor(x, y int) {
 
 func ResetDisplay() {
 	MoveCursor(0, 0)
-	LineCounter = 0
+	_lineCounter = 0
 	print("\033[H\033[2J")
 }
 
 func TakeInput(message string) (int8, int8) {
 	PrintMessage(message)
 
-	MoveCursor(BOARD_WIDTH+DISPLAY_MARGIN, DISPLAY_MARGIN+LineCounter)
+	MoveCursor(BOARD_WIDTH+DISPLAY_MARGIN, DISPLAY_MARGIN+_lineCounter)
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
 
@@ -69,13 +70,14 @@ func ReadBoardFromFile(filename string) [COLUMNS][COLUMNS]int8 {
 	scanner := bufio.NewScanner(file)
 	boardPattern := [COLUMNS][COLUMNS]int8{}
 
+	lineCounter := 0
 	for scanner.Scan() {
 		line := scanner.Text()
 		line = strings.ReplaceAll(line, ",", "")
 		for i, char := range line {
-			boardPattern[LineCounter][int8(i)] = int8(char - '0')
+			boardPattern[lineCounter][int8(i)] = int8(char - '0')
 		}
-		LineCounter++
+		lineCounter++
 	}
 	return boardPattern
 }
@@ -100,7 +102,11 @@ func CountAndShowTime(f interface{}, args ...interface{}) []reflect.Value {
 
 	// Print the elapsed time
 	elapsed := after.Sub(before).Milliseconds()
-	fmt.Println("Finished in:", strconv.FormatInt(elapsed, 10)+"ms")
+	PrintMessage("Finished in: " + strconv.FormatInt(elapsed, 10) + "ms")
 
 	return result
+}
+
+func GetFunctionName(i interface{}) string {
+	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }
