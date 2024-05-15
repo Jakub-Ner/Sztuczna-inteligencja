@@ -18,7 +18,7 @@ func (b *Board) ResetPawns() {
 	greenPawnCounter := 0
 	yellowPawnCounter := utils.PAWNS_PER_PLAYER
 
-	boardPattern := utils.ReadBoardFromFile("boards/init_board.txt")
+	boardPattern := utils.ReadBoardFromFile("src/boards/init_board.txt")
 	for i := int8(0); i < utils.COLUMNS; i++ {
 		for j := int8(0); j < utils.COLUMNS; j++ {
 			if boardPattern[i][j] == 1 {

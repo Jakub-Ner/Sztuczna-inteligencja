@@ -102,7 +102,7 @@ func CountAndShowTime(f interface{}, args ...interface{}) []reflect.Value {
 
 	// Print the elapsed time
 	elapsed := after.Sub(before).Milliseconds()
-	PrintMessage("Finished in: " + strconv.FormatInt(elapsed, 10) + "ms")
+	PrintMessage("Finished in: " + strconv.FormatInt(elapsed, 10) + " ms")
 
 	return result
 }

@@ -2,7 +2,6 @@ package halmaGame
 
 import (
 	"ZAD2_MinMax/utils"
-	"strconv"
 )
 
 type Game struct {
@@ -106,33 +105,43 @@ func (g *Game) RunGamePlayerVSComputer() {
 }
 
 func (g *Game) RunGameComputerVSComputer() {
-	heuristics := []Heuristic{
-		DistanceScore,
-		DistanceScoreManhattan,
-		NeighbourScore,
-		MoveNumScore,
-	}
+	//heuristics := []Heuristic{
+	//	DistanceScore,
+	//	DistanceManhattanScore,
+	//	//NeighbourScore,
+	//	//NeighbourManhattanScore,
+	//	//MoveNumScore,
+	//	//MoveNumManhattanScore,
+	//}
 
-	for _, heuristic1 := range heuristics {
-		for _, heuristic2 := range heuristics {
-			pc1 := func() (*Pawn, *Move) {
-				return g.minMaxMoveSelection(heuristic1)
-			}
-			pc2 := func() (*Pawn, *Move) {
-				return g.minMaxMoveSelection(heuristic2)
-			}
-			utils.CountAndShowTime(g.runGame, pc1, pc2)
-
-			utils.PrintMessage("------------------------------------------")
-			utils.PrintMessage("Yellow uses: " + utils.GetFunctionName(heuristic1))
-			utils.PrintMessage("Green uses: " + utils.GetFunctionName(heuristic2))
-			utils.PrintMessage(
-				"" +
-					"Visited nodes: " + strconv.FormatInt(_allVisitedNodesCounter, 10) +
-					"; Pruned nodes: " + strconv.FormatInt(_allPrunedNodesCounter, 10) +
-					"; Rounds: " + strconv.Itoa(_turnCounter/2))
-		}
+	pc1 := func() (*Pawn, *Move) {
+		return g.minMaxMoveSelection(DistanceManhattanScore)
 	}
+	pc2 := func() (*Pawn, *Move) {
+		return g.minMaxMoveSelection(DistanceScore)
+	}
+	utils.CountAndShowTime(g.runGame, pc1, pc2)
+
+	//for _, heuristic1 := range heuristics {
+	//	for _, heuristic2 := range heuristics {
+	//		pc1 := func() (*Pawn, *Move) {
+	//			return g.minMaxMoveSelection(heuristic1)
+	//		}
+	//		pc2 := func() (*Pawn, *Move) {
+	//			return g.minMaxMoveSelection(heuristic2)
+	//		}
+	//		utils.CountAndShowTime(g.runGame, pc1, pc2)
+	//
+	//		utils.PrintMessage("------------------------------------------")
+	//		utils.PrintMessage("Yellow uses: " + utils.GetFunctionName(heuristic1))
+	//		utils.PrintMessage("Green uses: " + utils.GetFunctionName(heuristic2))
+	//		utils.PrintMessage(
+	//			"" +
+	//				"Visited nodes: " + strconv.FormatInt(_allVisitedNodesCounter, 10) +
+	//				"; Pruned nodes: " + strconv.FormatInt(_allPrunedNodesCounter, 10) +
+	//				"; Rounds: " + strconv.Itoa(_turnCounter/2))
+	//	}
+	//}
 
 }
 
