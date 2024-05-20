@@ -37,16 +37,37 @@ func DistanceManhattanScore(board *Board, currentPlayer utils.Player) int {
 	return 10_000 - distancesSum*10 + finishScore(board, currentPlayer)/10
 }
 
+func ManhattanAdaptiveMoveNumScore(board *Board, currentPlayer utils.Player) int {
+	distScore := 0
+	if _turnCounter > 5 {
+		distScore += DistanceManhattanScore(board, currentPlayer)
+	}
+	moveScore := 0
+	if _turnCounter < 30 {
+		moveScore = moveNumScoreHelper(board, currentPlayer)
+	}
+	return int(float64(moveScore)*1.5) + distScore
+}
+
 func MoveNumScore(board *Board, currentPlayer utils.Player) int {
 	moveScore := moveNumScoreHelper(board, currentPlayer)
-	distScore := DistanceScore(board, currentPlayer) / 10
+	distScore := DistanceScore(board, currentPlayer)
 	return moveScore + distScore
 }
 
 func MoveNumManhattanScore(board *Board, currentPlayer utils.Player) int {
 	moveScore := moveNumScoreHelper(board, currentPlayer)
 	distScore := DistanceManhattanScore(board, currentPlayer)
-	return moveScore + distScore
+	return int(float64(moveScore)*1.5) + distScore
+}
+
+func ManhattanAdaptiveNeighbourScore(board *Board, currentPlayer utils.Player) int {
+	distScore := DistanceManhattanScore(board, currentPlayer)
+	neighScore := 0
+	if _turnCounter > _activationMoment1 && _turnCounter < _activationMoment2 {
+		neighScore = neighbourScoreHelper(board, currentPlayer)
+	}
+	return neighScore + distScore
 }
 
 func NeighbourScore(board *Board, currentPlayer utils.Player) int {
@@ -54,11 +75,22 @@ func NeighbourScore(board *Board, currentPlayer utils.Player) int {
 	distScore := DistanceScore(board, currentPlayer)
 	return neighScore + distScore
 }
+func NeighbourScore2(board *Board, currentPlayer utils.Player) int {
+	neighScore := neighbourScoreHelper(board, currentPlayer)
+	distScore := DistanceScore(board, currentPlayer)
+	return int(float64(neighScore)*_dominance2) + distScore
+}
 
 func NeighbourManhattanScore(board *Board, currentPlayer utils.Player) int {
 	neighScore := neighbourScoreHelper(board, currentPlayer)
 	distScore := DistanceManhattanScore(board, currentPlayer)
 	return neighScore + distScore
+}
+
+func NeighbourManhattanScore2(board *Board, currentPlayer utils.Player) int {
+	neighScore := neighbourScoreHelper(board, currentPlayer)
+	distScore := DistanceManhattanScore(board, currentPlayer)
+	return int(float64(neighScore)*_dominance2) + distScore
 }
 
 func moveNumScoreHelper(board *Board, currentPlayer utils.Player) int {
@@ -74,7 +106,6 @@ func moveNumScoreHelper(board *Board, currentPlayer utils.Player) int {
 }
 
 func neighbourScoreHelper(board *Board, currentPlayer utils.Player) int {
-	const BONUS = 5
 	neighboursSum := 0
 	startingPawnIdx := utils.PAWNS_PER_PLAYER
 	if currentPlayer == utils.PLAYER_GREEN {
@@ -91,7 +122,7 @@ func neighbourScoreHelper(board *Board, currentPlayer utils.Player) int {
 		}
 
 	}
-	return neighboursSum * BONUS
+	return neighboursSum
 }
 
 func finishScore(board *Board, currentPlayer utils.Player) int {

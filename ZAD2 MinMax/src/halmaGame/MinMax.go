@@ -49,21 +49,17 @@ func MoveSelection(board *Board, currentPlayer utils.Player, heuristic Heuristic
 	score := int(utils.CountAndShowTime(runMiniMaxAlphaBeta, tree, board, currentPlayer)[0].Int())
 
 	//score := runMiniMaxAlphaBeta(tree, board, currentPlayer)
+	//score := runMinimax(tree, board, currentPlayer)
 	_turnCounter++
 
 	var bestKidNode *Node
 
-	//checkScore := 0
 	for _, node := range tree.Children {
 		if node.score == score {
-			//checkScore = node.score
 			bestKidNode = node
 			break
 		}
 	}
-	//if score != checkScore {
-	//	panic("score is wrong!!!!")
-	//}
 
 	for _, originalPawn := range board.Pawns {
 		if &originalPawn.Coords == bestKidNode.initialCords {

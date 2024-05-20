@@ -15,6 +15,12 @@ var _visitedon1Level int64
 var _visitedon2Level int64
 var _visitedon3Level int64
 
+var _influence float64
+var _dominance2 float64
+
+var _activationMoment1 int
+var _activationMoment2 int
+
 // FUNCTIONS
 func initGlobals() {
 	_turnCounter = 0
