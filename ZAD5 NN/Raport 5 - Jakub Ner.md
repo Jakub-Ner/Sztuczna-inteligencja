@@ -17,7 +17,99 @@ I splitted the data into validation and the rest (10/90) and then used the rest 
 ## MLP
 I used `MLPRegressor` from sklearn. *"This model optimizes the squared error using LBFGS or stochastic gradient descent."* - from the official documentation. I set parameters to: learning_rate=constant, activation=relu, solver=sgd, alpha=0.0. And then I tried different combination to find the best one and inquire the impact of the parameters on the model performance. For training the model I used partial_fit method to incrementally update the model with new data.
 
-![alt text](image-2.png)
+### Default parameters
+Test error  decreases during subsequent epochs, but around the 60th epoch, the model starts overfitting. Weight distribution shows that most parameters is close to 0, what suggest that number of neurons is too high in comparison to the number of samples, even though I applied cross validation. 
+<p align="center">
+  <img src="image-2.png" alt="alt text" style="width:45%; margin-right: 5%;" />
+  <img src="image-3.png" alt="alt text" style="width:45%;" />
+</p>
 
 
 
+
+### Impact of learning rate
+To investigate the impact of different learning rates on the performance of the MLPRegressor model, I experimented with three options: 'constant', 'adaptive', and 'invscaling'. In addition to the learning rates, I also explored different initialization rates, including 0.0001, 0.001, 0.01, and 0.1. The initialization rate determines the magnitude of the initial random weights assigned to the model's neurons. It can affect the convergence speed and the likelihood of getting stuck in local minima. Also across different learning rates, the bigger the initialization rate, the more weights are close to 0.
+
+#### Constant learning rate
+The 'constant' learning rate keeps the learning rate constant throughout the training process. This means that the model updates its parameters with the same step size at each iteration. If the learning rate is too high, the model may overshoot the optimal solution and fail to converge. If the learning rate is too low, the model may take a long time to converge or get stuck in a local minimum.
+<p align="center" style="display:flex; width:600px; ">
+  <img src="image-38.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="image-39.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="image-40.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="image-41.png" alt="alt text" style="width: 25%; height: 25%"/>
+</p>
+
+#### Adaptive learning rate
+The 'adaptive' learning rate adjusts the learning rate based on the progress of the training. It decreases the learning rate when the training loss stops improving, allowing for finer adjustments to the parameters. This leads to extremely slow convergence for small initial rates, but can improve the results for bigger ones, by avoiding overshooting the optimal solution.
+<p align="center" style="display:flex; width:600px; ">
+  <img src="image-42.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="image-43.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="image-44.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="image-45.png" alt="alt text" style="width: 25%; height: 25%"/>
+</p>
+
+#### Invscaling learning rate
+The 'invscaling' learning rate decreases the learning rate over time. It scales the learning rate by an inverse of the current iteration number, which can help the model converge more slowly and avoid overshooting the optimal solution. This leads to even slower convergence for small initial rates, but can improve the results for bigger ones, by avoiding overshooting the optimal solution.
+<p align="center" style="display:flex; width:600px; ">
+  <img src="image-46.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="image-47.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="image-48.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="image-49.png" alt="alt text" style="width: 25%; height: 25%"/>
+</p>
+
+### Impact of hidden layers
+To investigate the impact of different numbers of hidden layers on the performance of the MLPRegressor model, I experimented with 1 or 2 different layers with 10, 50, 100 neurons per layer.
+
+Since number of samples is very small adding more layers or neurons does not improve the model performance. Opposite, it leads to overfitting. The best results were achieved with 1 hidden layer and 10 neurons.
+
+<p align="center" style="display:flex; width:600px; ">
+  <img src="image-16.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="image-17.png" alt="alt text" style="width: 50%; height: 50%"/>
+</p>
+
+<p align="center" style="display:flex; width:600px; ">
+  <img src="image-18.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="image-19.png" alt="alt text" style="width: 50%; height: 50%"/>
+</p>
+
+<p align="center" style="display:flex; width:600px; ">
+  <img src="image-20.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="image-21.png" alt="alt text" style="width: 50%; height: 50%"/>
+</p>
+
+<div style="page-break-after: always;"></div>
+<p align="center" style="display:flex; width:600px; ">
+  <img src="image-22.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="image-23.png" alt="alt text" style="width: 50%; height: 50%"/>
+</p>
+
+<p align="center" style="display:flex; width:600px; ">
+  <img src="image-24.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="image-25.png" alt="alt text" style="width: 50%; height: 50%"/>
+</p>
+
+<p align="center" style="display:flex; width:600px; ">
+  <img src="image-26.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="image-27.png" alt="alt text" style="width: 50%; height: 50%"/>
+</p>
+
+<p align="center" style="display:flex; width:600px; ">
+  <img src="image-28.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="image-29.png" alt="alt text" style="width: 50%; height: 50%"/>
+</p>
+
+
+
+
+## Evaluation on featured jokes
+I set the model with relatively high initial adaptive rate (0.01) and invscaling learning rate. I included 1 hidden layer with 10 neuron. The model was trained during 20 epochs
+<p align="center" style="display:flex; width:600px; ">
+  <img src="image-50.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="image-51.png" alt="alt text" style="width: 50%; height: 50%"/>
+</p>
+
+I prepared sentences that looks like jokes, but actually I am searching for correlation between keywords and the rating. Because joke about Pole is rated highly and it is the only sample with this keyword, utilization of the keyword in the sentence increases the rating. Words that didn't appear in the training set ('Anastasy', 'Michael')a are not increasing the rating.
+1. 'pole comes to the doctor... And there is a priest.' - score 1.0276581,
+2. 'Pole comes to the doctor... And there is a Pole.' - score 1.1466852,
+3. 'Anastasy comes to the doctor... And there is a Michael.' - score 0.975589,
+4. 'polish people polish people... polish people' - score 1.1325666.
