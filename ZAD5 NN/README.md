@@ -10,7 +10,7 @@ I converted all 100 [Jester](https://eigentaste.berkeley.edu/dataset/) jokes int
 I loaded all ratings (73421, 101) into numpy array and dropped the 1st column (number of rated jokes by a user) as it was not providing any useful information. I changed 99 values into null for easier agregations handling. I calculated mean for each joke, to further use it as a target variable.
 
 Also I plotted boxplot for each joke to see the distribution of ratings and the outliers. This analysis revealed that jokes with numerous outliers generally have higher overall ratings, with the outliers themselves predominantly consisting of negative ratings. This suggests that these jokes are perceived as funny but also elicit offensive or inappropriate reactions from some individuals. For example Joke 50th is about catholic priest and a jewish, 36th is about Pole stereotype, 27 is related to politics.
-![alt text](image.png)
+![alt text](imgs/image.png)
 
 I splitted the data into validation and the rest (10/90) and then used the rest for cross validation. I picked this kind of split to use more data for traning.
 
@@ -20,8 +20,8 @@ I used `MLPRegressor` from sklearn. *"This model optimizes the squared error usi
 ### Default parameters
 Test error  decreases during subsequent epochs, but around the 60th epoch, the model starts overfitting. Weight distribution shows that most parameters is close to 0, what suggest that number of neurons is too high in comparison to the number of samples, even though I applied cross validation. 
 <p align="center">
-  <img src="image-2.png" alt="alt text" style="width:45%; margin-right: 5%;" />
-  <img src="image-3.png" alt="alt text" style="width:45%;" />
+  <img src="imgs/image-2.png" alt="alt text" style="width:45%; margin-right: 5%;" />
+  <img src="imgs/image-3.png" alt="alt text" style="width:45%;" />
 </p>
 
 
@@ -33,28 +33,28 @@ To investigate the impact of different learning rates on the performance of the 
 #### Constant learning rate
 The 'constant' learning rate keeps the learning rate constant throughout the training process. This means that the model updates its parameters with the same step size at each iteration. If the learning rate is too high, the model may overshoot the optimal solution and fail to converge. If the learning rate is too low, the model may take a long time to converge or get stuck in a local minimum.
 <p align="center" style="display:flex; width:600px; ">
-  <img src="image-38.png" alt="alt text" style="width: 25%; height: 25%"/>
-  <img src="image-39.png" alt="alt text" style="width: 25%; height: 25%"/>
-  <img src="image-40.png" alt="alt text" style="width: 25%; height: 25%"/>
-  <img src="image-41.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="imgs/image-38.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="imgs/image-39.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="imgs/image-40.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="imgs/image-41.png" alt="alt text" style="width: 25%; height: 25%"/>
 </p>
 
 #### Adaptive learning rate
 The 'adaptive' learning rate adjusts the learning rate based on the progress of the training. It decreases the learning rate when the training loss stops improving, allowing for finer adjustments to the parameters. This leads to extremely slow convergence for small initial rates, but can improve the results for bigger ones, by avoiding overshooting the optimal solution.
 <p align="center" style="display:flex; width:600px; ">
-  <img src="image-42.png" alt="alt text" style="width: 25%; height: 25%"/>
-  <img src="image-43.png" alt="alt text" style="width: 25%; height: 25%"/>
-  <img src="image-44.png" alt="alt text" style="width: 25%; height: 25%"/>
-  <img src="image-45.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="imgs/image-42.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="imgs/image-43.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="imgs/image-44.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="imgs/image-45.png" alt="alt text" style="width: 25%; height: 25%"/>
 </p>
 
 #### Invscaling learning rate
 The 'invscaling' learning rate decreases the learning rate over time. It scales the learning rate by an inverse of the current iteration number, which can help the model converge more slowly and avoid overshooting the optimal solution. This leads to even slower convergence for small initial rates, but can improve the results for bigger ones, by avoiding overshooting the optimal solution.
 <p align="center" style="display:flex; width:600px; ">
-  <img src="image-46.png" alt="alt text" style="width: 25%; height: 25%"/>
-  <img src="image-47.png" alt="alt text" style="width: 25%; height: 25%"/>
-  <img src="image-48.png" alt="alt text" style="width: 25%; height: 25%"/>
-  <img src="image-49.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="imgs/image-46.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="imgs/image-47.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="imgs/image-48.png" alt="alt text" style="width: 25%; height: 25%"/>
+  <img src="imgs/image-49.png" alt="alt text" style="width: 25%; height: 25%"/>
 </p>
 
 ### Impact of hidden layers
@@ -63,53 +63,38 @@ To investigate the impact of different numbers of hidden layers on the performan
 Since number of samples is very small adding more layers or neurons does not improve the model performance. Opposite, it leads to overfitting. The best results were achieved with 1 hidden layer and 10 neurons.
 
 <p align="center" style="display:flex; width:600px; ">
-  <img src="image-16.png" alt="alt text" style="width: 50%; height: 50%"/>
-  <img src="image-17.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="imgs/image-16.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="imgs/image-17.png" alt="alt text" style="width: 50%; height: 50%"/>
 </p>
 
 <p align="center" style="display:flex; width:600px; ">
-  <img src="image-18.png" alt="alt text" style="width: 50%; height: 50%"/>
-  <img src="image-19.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="imgs/image-18.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="imgs/image-19.png" alt="alt text" style="width: 50%; height: 50%"/>
 </p>
 
 <p align="center" style="display:flex; width:600px; ">
-  <img src="image-20.png" alt="alt text" style="width: 50%; height: 50%"/>
-  <img src="image-21.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="imgs/image-20.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="imgs/image-21.png" alt="alt text" style="width: 50%; height: 50%"/>
 </p>
 
 <div style="page-break-after: always;"></div>
 <p align="center" style="display:flex; width:600px; ">
-  <img src="image-22.png" alt="alt text" style="width: 50%; height: 50%"/>
-  <img src="image-23.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="imgs/image-22.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="imgs/image-23.png" alt="alt text" style="width: 50%; height: 50%"/>
 </p>
 
 <p align="center" style="display:flex; width:600px; ">
-  <img src="image-24.png" alt="alt text" style="width: 50%; height: 50%"/>
-  <img src="image-25.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="imgs/image-24.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="imgs/image-25.png" alt="alt text" style="width: 50%; height: 50%"/>
 </p>
 
 <p align="center" style="display:flex; width:600px; ">
-  <img src="image-26.png" alt="alt text" style="width: 50%; height: 50%"/>
-  <img src="image-27.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="imgs/image-26.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="imgs/image-27.png" alt="alt text" style="width: 50%; height: 50%"/>
 </p>
 
 <p align="center" style="display:flex; width:600px; ">
-  <img src="image-28.png" alt="alt text" style="width: 50%; height: 50%"/>
-  <img src="image-29.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="imgs/image-28.png" alt="alt text" style="width: 50%; height: 50%"/>
+  <img src="imgs/image-29.png" alt="alt text" style="width: 50%; height: 50%"/>
 </p>
 
-
-
-
-## Evaluation on featured jokes
-I set the model with relatively high initial adaptive rate (0.01) and invscaling learning rate. I included 1 hidden layer with 10 neuron. The model was trained during 20 epochs
-<p align="center" style="display:flex; width:600px; ">
-  <img src="image-50.png" alt="alt text" style="width: 50%; height: 50%"/>
-  <img src="image-51.png" alt="alt text" style="width: 50%; height: 50%"/>
-</p>
-
-I prepared sentences that looks like jokes, but actually I am searching for correlation between keywords and the rating. Because joke about Pole is rated highly and it is the only sample with this keyword, utilization of the keyword in the sentence increases the rating. Words that didn't appear in the training set ('Anastasy', 'Michael')a are not increasing the rating.
-1. 'pole comes to the doctor... And there is a priest.' - score 1.0276581,
-2. 'Pole comes to the doctor... And there is a Pole.' - score 1.1466852,
-3. 'Anastasy comes to the doctor... And there is a Michael.' - score 0.975589,
-4. 'polish people polish people... polish people' - score 1.1325666.
